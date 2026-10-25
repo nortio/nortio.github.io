@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install pandoc
-        run: sudo apt install pandoc
+        run: sudo apt install pandoc -y
       - name: Generate html
         run: ./gen
       - name: Upload static files as artifact
@@ -25,6 +25,9 @@ jobs:
           path: out/
 
   deploy:
+    permissions:
+      pages: write   
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

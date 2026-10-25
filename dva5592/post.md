@@ -14,6 +14,9 @@ E' possibile utilizzare il modem D-Link DVA5592 in combinazione con un altro rou
 
 Questa guida è basata sul metodo 4 descritto in [questo thread](https://www.dlink-forum.it/d/3801-come-collegare-un-altro-router-al-dva-5592-dva-5593) del forum D-Link italia. L'unica differenza è la disattivazione dell'autosense failover che causa problemi al riavvio del modem (procedura descritta alla fine).
 
+<details>
+<summary>Guida incompleta, segui il thread originale e poi continua con la disattivazione dell'autosense failover</summary>
+
 ## Eliminazione delle connessioni WAN esistenti
 
 Eliminare tutte le connessioni WAN esistenti:
@@ -32,6 +35,7 @@ Eliminare tutte le connessioni WAN esistenti:
 ## Creazione bridge WAN
 
 Segui la guida nel thread
+</details>
 
 ## Disabilitare l'Autosense Failover
 

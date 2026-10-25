@@ -1,0 +1,19 @@
+code.diff span.va {
+  color: #22863a;
+  background-color: #f0fff4;
+}
+
+code.diff span.st {
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+
+.note {
+  &>.title p {
+    display: none;
+  }
+
+  &>.title:after {
+    content: "Nota";
+  }
+}

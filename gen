@@ -1,0 +1,3 @@
+#!/bin/sh
+
+mkdir -p out && cat top.html > out/index.html && find . -maxdepth 1 -mindepth 1 -type d ! -name "out" ! -name ".git" -exec sh -c 'cd $1 && pandoc -i "post.md" -o ../out/$(basename "$1").html --standalone --css ../style.css -M document-css=true -f gfm --toc --embed-resources' - {} \; -exec sh -c 'echo "<li><a href=\"$1.html\">$(grep -E "title:(.*)" $1/post.md | cut -d":" -f2)</a></li>"' - {} \; >> out/index.html && cat bottom.html >> out/index.html

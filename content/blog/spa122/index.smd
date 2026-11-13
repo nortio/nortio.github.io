@@ -1,12 +1,15 @@
 ---
-title: Configurazione dell'adattatore Cisco SPA122 per una linea Windtre business
+.title = "Configurazione dell'adattatore Cisco SPA122 per una linea Windtre business",
+.date = .date("2026-10-30T00:00:00"),
+.layout = "home.shtml",
 ---
 
-## Introduzione
+
+# Introduzione
 
 E' possibile configurare l'adattatore ATA Cisco SPA122 con il voip fornito da una linea Windtre business. La procedura è uguale a quella descritta in [questa guida](https://www.sandon.it/2020/09/02/configurazione-ata-cisco-spa-112-con-voip-windtre/) (per Cisco SPA112), vanno solo cambiati alcuni valori.
 
-## Proxy e Outbound Proxy
+# Proxy e Outbound Proxy
 
 Cercando nella configurazione originale del DVA5592 (modem fornito da Windtre), ci sono dei valori che differiscono da `voip.windtre.it` e `windtre.it`. Per controllare:
 

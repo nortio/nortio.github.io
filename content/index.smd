@@ -1,0 +1,9 @@
+---
+.title = "Homepage",
+.date = .date("2026-11-12T00:00:00"),
+.layout = "home.shtml",
+---
+
+# hello world
+
+dsad

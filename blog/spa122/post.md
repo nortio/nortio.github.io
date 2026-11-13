@@ -1,5 +1,7 @@
 ---
 title: Configurazione dell'adattatore Cisco SPA122 per una linea Windtre business
+date: 2026-10-25
+lang: it
 ---
 
 ## Introduzione

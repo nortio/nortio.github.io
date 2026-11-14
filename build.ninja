@@ -1,0 +1,30 @@
+builddir = ./out
+common_flags = -Wall -O2
+cflags = $common_flags  -std=c99
+cxxflags = $common_flags  -std=c++20
+cc = cc
+cxx = c++
+ld = cc
+ldflags =
+libs =
+root = .
+
+rule cc
+ deps = gcc
+ depfile = $out.d
+ command = $cc -MMD -MF $out.d $cflags -c $in -o $out
+
+rule cxx
+ deps = gcc
+ depfile = $out.d
+ command = $cxx -MMD -MF $out.d $cxxflags -c $in -o $out
+
+rule ld
+ command = $ld $ldflags -o $out $in $libs
+
+build $builddir/src/gen.o: cc $root/src/gen.c
+build $builddir/src/md4c.o: cc $root/src/md4c.c
+build $builddir/src/md4c-html.o: cc $root/src/md4c-html.c
+build $builddir/src/entity.o: cc $root/src/entity.c
+build $builddir/main: ld $builddir/src/gen.o $builddir/src/md4c.o $builddir/src/md4c-html.o $builddir/src/entity.o
+# libs = -lSDL

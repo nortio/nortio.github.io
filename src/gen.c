@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#include <errno.h>
 #include "dyn_array.h"
 #include "md4c-html.h"
 #include <dirent.h>
@@ -15,31 +16,111 @@
 
 Array(char);
 
-void process(const MD_CHAR *data, MD_SIZE size, void *userdata) {
-    Array_char *out = userdata;
-    fprintf(stdout, "L: %.*s\n", size, data);
-    char_array_push_multiple(out, (char*)data, size);
+typedef struct Span {
+    size_t len;
+    const char* data;
+} Span;
+
+int writeall(FILE* file, Span data) {
+    size_t written = 0;
+    do {
+        written = fwrite(data.data, sizeof((*data.data)), data.len, file);
+        if(written == 0) {
+            perror("fwrite");
+            return 1;
+        }
+    } while (data.len - written);
+
+    return 0;
 }
 
-int read_and_parse(int fd, size_t file_size, Array_char *out) {
-    const char *file_data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+/**
+ * Closes the fd after mmap of the file
+ */
+Span fdreadall(int fd, size_t size, int* err) {
+    const char *file_data = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (file_data == MAP_FAILED) {
-        perror("mmap");
-        return 1;
+        perror("fdreadall: mmap");
+        *err = errno;
+        return (Span){
+            .data = NULL,
+            .len = 0
+        };
     }
 
     if (close(fd)) {
-        perror("close");
+        perror("fdreadall: close");
+        *err = errno;
+        return (Span){
+            .data = NULL,
+            .len = 0
+        };
+    }
+
+    *err = 0;
+    return (Span) {
+        .data = file_data,
+        .len = size
+    };
+}
+
+Span readall(const char* name, int* err) {
+    int fd = open(name, O_RDONLY);
+    if(fd == -1) {
+        *err = errno;
+        return (Span){
+            .data = NULL,
+            .len = 0
+        };
+    }
+
+    struct stat s = {0};
+    if(fstat(fd, &s)) {
+        *err = errno;
+        return (Span){
+            .data = NULL,
+            .len = 0
+        };
+    }
+
+    *err = 0;
+    return fdreadall(fd, s.st_size, err);
+}
+
+int closeall(Span *file_data) {
+    if (munmap((void *)file_data->data, file_data->len)) {
+        file_data->data = NULL;
+        file_data->len = 0;
         return 1;
     }
 
-    if (md_html(file_data, file_size, process, out, 0, 0)) {
+    file_data->data = NULL;
+    file_data->len = 0;
+
+    return 0;
+}
+
+void process(const MD_CHAR *data, MD_SIZE size, void *userdata) {
+    Array_char *out = userdata;
+    fprintf(stdout, "L: %.*s\n", size, data);
+    char_array_push_multiple(out, (char *)data, size);
+}
+
+int read_and_parse(int fd, size_t file_size, Array_char *out) {
+    int err = 0;
+    Span file_data = fdreadall(fd, file_size, &err);
+    if(err) {
+        perror("read_and_parse");
+        return 1;
+    }
+
+    if (md_html(file_data.data, file_data.len, process, out, 0, 0)) {
         fprintf(stderr, "md_html failed\n");
         return 1;
     }
 
-    if (munmap((void *)file_data, file_size)) {
-        perror("munmap");
+    if (closeall(&file_data)) {
+        perror("fdcloseall");
         return 1;
     }
 
@@ -107,7 +188,34 @@ int main(int argc, char **argv) {
         }
     }
 
+    int err = 0;
+    Span top = readall("top.html", &err);
+    if(err) {
+        perror("readall");
+        return 1;
+    }
+
+    Span bottom = readall("bottom.html", &err);
+    if(err) {
+        perror("readall");
+        return 1;
+    }
+
     fprintf(stdout, "size: %lu\n%.*s", out.count, (int)out.count, out.data);
+    FILE *index_html_file = fopen("./out/index.html", "w+");
+    if (!index_html_file) {
+        perror("fopen");
+        return 1;
+    }
+
+    writeall(index_html_file, top);
+    writeall(index_html_file, (Span){.data = out.data, .len = out.count});
+    writeall(index_html_file, bottom);
+
+    if(fclose(index_html_file)) {
+        perror("fclose");
+        return 1;
+    }
 
     if (closedir(content_dir)) {
         perror("closedir");

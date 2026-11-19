@@ -1,6 +1,6 @@
-builddir = ./out
+builddir = ./build
 common_flags = -Wall -O2
-cflags = $common_flags  -std=c99
+cflags = $common_flags  -std=c99 -Wno-unused-function
 cxxflags = $common_flags  -std=c++20
 cc = cc
 cxx = c++
